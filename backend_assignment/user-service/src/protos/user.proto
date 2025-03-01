@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+    rpc getUserById(UserIdRequest) returns (UserResponse);
+    rpc createUser(CreateUserRequest) returns (UserResponse);
+    rpc updateUser(UpdateUserRequest) returns (UserResponse);
+    rpc deleteUser(UserIdRequest) returns (EmptyResponse);
+    rpc searchUser(SearchUserRequest) returns (UserListResponse);
+    rpc followUser(FollowRequest) returns (EmptyResponse);
+    rpc unfollowUser(FollowRequest) returns (EmptyResponse);
+    rpc login(LoginRequest) returns (UserResponse);
+    rpc signup(CreateUserRequest) returns (UserResponse);
+    rpc listUsers(EmptyRequest) returns (UserListResponse);
+}
+
+message EmptyRequest {}
+
+message UserIdRequest {
+    string id = 1;
+}
+
+message CreateUserRequest {
+    string name = 1;
+    string mobile = 2;
+    string email = 3;
+    string password = 4;
+}
+
+message UpdateUserRequest {
+    string id = 1;
+    string name = 2;
+    string mobile = 3;
+    string email = 4;
+    string password = 5;
+}
+
+message SearchUserRequest {
+    string name = 1;
+}
+
+message FollowRequest {
+    string userId = 1;
+    string followerId = 2;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message UserResponse {
+    User user = 1;
+}
+
+message UserListResponse {
+    repeated User users = 1;
+}
+
+message EmptyResponse {}
+
+message User {
+    string _id = 1;
+    string name = 2;
+    string mobile = 3;
+    string email = 4;
+    repeated string followers = 5;
+    repeated string following = 6;
+    string createdAt = 7;
+    string updatedAt = 8;
+}

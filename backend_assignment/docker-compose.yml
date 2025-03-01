@@ -1,0 +1,133 @@
+services:
+  user-service:
+    container_name: user-service
+    build: ./user-service
+    env_file:
+      - ./user-service/.env
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./user-service:/usr/spyne_backend_assignment/user-service
+    depends_on:
+      - mongo
+      - rabbitmq
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3001/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  discussion-service:
+    container_name: discussion-service
+    build: ./discussion-service
+    env_file:
+      - ./discussion-service/.env
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./discussion-service:/usr/spyne_backend_assignment/discussion-service
+    depends_on:
+      - mongo
+      - rabbitmq
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3002/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  notification-service:
+    container_name: notification-service
+    build: ./notification-service
+    env_file:
+      - ./notification-service/.env
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./notification-service:/usr/spyne_backend_assignment/notification-service
+    depends_on:
+      - rabbitmq
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3003/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  gateway-service:
+    container_name: gateway-service
+    build: ./gateway-service
+    env_file:
+      - ./gateway-service/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./gateway-service:/usr/spyne_backend_assignment/gateway-service
+    depends_on:
+      - user-service
+      - discussion-service
+      - notification-service
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  client-ui:
+    container_name: client-ui
+    build: ./client-ui
+    env_file:
+      - ./client-ui/.env
+    command: serve -s build -l ${CLIENT_UI_PORT}
+    ports:
+      - ${CLIENT_UI_PORT}:${CLIENT_UI_PORT}
+    volumes:
+      - ./client-ui:/usr/spyne_backend_assignment/client-ui
+    depends_on:
+      - gateway-service
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:${CLIENT_UI_PORT}/"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db:/data/db
+    healthcheck:
+      test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping && rabbitmq-diagnostics -q status
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

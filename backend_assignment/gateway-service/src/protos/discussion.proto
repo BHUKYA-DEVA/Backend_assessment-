@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package discussion;
+
+service DiscussionService {
+    rpc createDiscussion(CreateDiscussionRequest) returns (DiscussionResponse);
+    rpc updateDiscussion(UpdateDiscussionRequest) returns (DiscussionResponse);
+    rpc deleteDiscussion(DiscussionIdRequest) returns (EmptyResponse);
+    rpc getDiscussion(DiscussionIdRequest) returns (DiscussionResponse);
+    rpc searchDiscussionsByTag(SearchTagRequest) returns (DiscussionListResponse);
+    rpc searchDiscussionsByText(SearchTextRequest) returns (DiscussionListResponse);
+    rpc likeDiscussion(LikeRequest) returns (DiscussionResponse);
+    rpc commentDiscussion(CreateCommentRequest) returns (CommentResponse);
+    rpc replyComment(CreateCommentRequest) returns (CommentResponse);
+    rpc likeComment(LikeRequest) returns (CommentResponse);
+}
+
+message CreateDiscussionRequest {
+    string userId = 1;
+    string text = 2;
+    string image = 3;
+    repeated string tags = 4;
+}
+
+message UpdateDiscussionRequest {
+    string id = 1;
+    string text = 2;
+    string image = 3;
+    repeated string tags = 4;
+}
+
+message DiscussionIdRequest {
+    string id = 1;
+}
+
+message SearchTagRequest {
+    string tag = 1;
+}
+
+message SearchTextRequest {
+    string text = 1;
+}
+
+message LikeRequest {
+    string id = 1;
+    string userId = 2;
+}
+
+message CreateCommentRequest {
+    string discussionId = 1;
+    string commentId = 2;
+    string userId = 3;
+    string text = 4;
+}
+
+message DiscussionResponse {
+    Discussion discussion = 1;
+}
+
+message CommentResponse {
+    Comment comment = 1;
+}
+
+message DiscussionListResponse {
+    repeated Discussion discussions = 1;
+}
+
+message EmptyResponse {}
+
+message Discussion {
+    string id = 1;
+    string userId = 2;
+    string text = 3;
+    string image = 4;
+    repeated string tags = 5;
+    repeated string likes = 6;
+    repeated string comments = 7;
+    int32 viewCount = 8;
+    string createdAt = 9;
+    string updatedAt = 10;
+}
+
+message Comment {
+    string id = 1;
+    string discussionId = 2;
+    string userId = 3;
+    string text = 4;
+    repeated string likes = 5;
+    repeated string replies = 6;
+    string createdAt = 7;
+    string updatedAt = 8;
+}
